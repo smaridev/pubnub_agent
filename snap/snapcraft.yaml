@@ -1,0 +1,21 @@
+name: pubnub-agent
+version: 1.0
+summary: cloud pubnub agent
+description: >
+    sends and receive messages from cloud pubnub server
+architectures: [armhf]
+confinement: devmode
+grade: stable
+            
+apps:
+  pubnub-agent:
+    command: 'sh $SNAP/start.sh' 
+
+parts:
+  pubnub-agent:
+    plugin: python
+  move:
+    plugin: dump
+    source: .
+
+architectures: [armhf]
