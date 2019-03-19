@@ -17,7 +17,7 @@ pnconfig.uuid = 'thing_point_1_uuid'
  
 pubnub = PubNub(pnconfig)
 client = mqtt.Client()
-pubnub.publish().channel("aruba_to_cloud.tp1.healthmon.stats").message("test publish").sync()
+pubnub.publish().channel("aruba_to_cloud.tp1.healthmon/stats").message("test publish").sync()
 
 deviceserialno = None
 
@@ -61,8 +61,8 @@ def on_message(client, userdata, msg):
     print("message topic:" + str(msg.topic)+" "+str(msg.payload))
     m_decode=str(msg.payload.decode("utf-8","ignore"))
     payload_dict = json.loads(m_decode)
-    converted_topic = msg.topic.replace("/",".") 
-    forward_chanel = "aruba_to_cloud." + str(deviceserialno) + "." + str(converted_topic)
+    #converted_topic = msg.topic.replace("/",".") 
+    forward_chanel = "edge_to_cloud." + str(deviceserialno) + "." + str(converted_topic)
     print("forward to pubnub channel: {}".format(forward_chanel))
     print("pubnub client:{}".format(dir(pubnub)))
     pubnub.publish().channel(forward_chanel).message(payload_dict).pn_async(my_publish_callback)
