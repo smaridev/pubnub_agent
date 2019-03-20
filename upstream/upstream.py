@@ -30,17 +30,15 @@ pnconfig.subscribe_key = 'sub-c-a57ab586-2e94-11e9-8208-aaa77ad184aa'
 pnconfig.publish_key = 'pub-c-395634b8-6b43-407a-bd80-e656f030d997'
 pnconfig.reconnect_policy = PNReconnectionPolicy.LINEAR
 pnconfig.uuid = "thingpointPublisher_" + deviceserialno
- 
+#pnconfig.uuid = "thingpointPublisher"
 pubnub = PubNub(pnconfig)
 client = mqtt.Client()
-pubnub.publish().channel("aruba_to_cloud.tp1.healthmon/stats").message("test publish").sync()
-
 
 def my_publish_callback(envelope, status):
     # Check whether request successfully completed or not
     if not status.is_error():
         # Message successfully published to specified channel.
-        print("success status:{}".format(status))
+        print("success status:{}".format(dir(status)))
     else:
         # Handle message publish error. Check 'category' property to find out possible issue
         # because of which request did fail.
@@ -62,11 +60,10 @@ def on_message(client, userdata, msg):
     print("message topic:" + str(msg.topic)+" "+str(msg.payload))
     m_decode=str(msg.payload.decode("utf-8","ignore"))
     payload_dict = json.loads(m_decode)
-    forward_chanel = "edge_to_cloud." + str(deviceserialno) + "." + str(converted_topic)
+    app_channel = msg.topic.replace("/","-")
+    forward_chanel = "edge_to_cloud." + str(deviceserialno) + "." + str(app_channel)
     print("forward to pubnub channel: {}".format(forward_chanel))
-    print("pubnub client:{}".format(dir(pubnub)))
     pubnub.publish().channel(forward_chanel).message(payload_dict).pn_async(my_publish_callback)
-    print("after publish")
 
 
       
@@ -75,6 +72,7 @@ def main():
     global client
     client.on_connect = on_connect
     client.on_message = on_message
+    #pubnub.publish().channel("edge_to_cloud.tp1.Thingy52-registration").message(msg).pn_async(my_publish_callback)
     client.connect("localhost", 1883, 60)
     client.loop_forever()
 

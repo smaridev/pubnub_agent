@@ -1,12 +1,18 @@
 import io
 import json
 import time
+import atexit
 
 import paho.mqtt.client as mqtt
 from pubnub.callbacks import SubscribeCallback
 from pubnub.enums import PNReconnectionPolicy, PNStatusCategory
 from pubnub.pnconfiguration import PNConfiguration
 from pubnub.pubnub import PubNub
+
+
+
+
+
 
 def getserial():
     cpuserial = "0000000000000000"
@@ -80,14 +86,20 @@ class MySubscribeCallback(SubscribeCallback):
         print("message topic: {}".format(message.channel))
         app_topic = message.channel.replace("cloud_to_edge." + deviceserialno + ".", '')
         print("app_topic:{}".format(app_topic))
-        client.publish(app_topic, message.payload)
-      
+        #client.publish(app_topic, message.payload)
+
+def exit_handler():
+    print("unsubscribing before exiting!")
+    pubnub.unsubscribe_all()
+
+atexit.register(exit_handler)
+
 def main():
     """run the application"""
     global client
     global deviceserialno
-    client.connect("localhost", 1883, 60)
-    client.loop_start()
+    #client.connect("localhost", 1883, 60)
+    #client.loop_start()
     pubnub.add_listener(MySubscribeCallback())
     downstream_channel = "cloud_to_edge." + deviceserialno + ".*"
     print("subscribing to downstream channel :{}".format(downstream_channel))
