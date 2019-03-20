@@ -8,18 +8,6 @@ from pubnub.enums import PNReconnectionPolicy, PNStatusCategory
 from pubnub.pnconfiguration import PNConfiguration
 from pubnub.pubnub import PubNub
 
-pnconfig = PNConfiguration()
- 
-pnconfig.subscribe_key = 'sub-c-a57ab586-2e94-11e9-8208-aaa77ad184aa'
-pnconfig.publish_key = 'pub-c-395634b8-6b43-407a-bd80-e656f030d997'
-pnconfig.reconnect_policy = PNReconnectionPolicy.LINEAR
-pnconfig.uuid = 'thing_point_1_uuid'
- 
-pubnub = PubNub(pnconfig)
-client = mqtt.Client()
-pubnub.publish().channel("aruba_to_cloud.tp1.healthmon/stats").message("test publish").sync()
-
-deviceserialno = None
 
 def getserial():
     cpuserial = "0000000000000000"
@@ -33,6 +21,19 @@ def getserial():
         cpuserial = "ERROR000000000"
    
     return cpuserial 
+
+
+pnconfig = PNConfiguration()
+deviceserialno = getserial()
+
+pnconfig.subscribe_key = 'sub-c-a57ab586-2e94-11e9-8208-aaa77ad184aa'
+pnconfig.publish_key = 'pub-c-395634b8-6b43-407a-bd80-e656f030d997'
+pnconfig.reconnect_policy = PNReconnectionPolicy.LINEAR
+pnconfig.uuid = "thingpointPublisher_" + deviceserialno
+ 
+pubnub = PubNub(pnconfig)
+client = mqtt.Client()
+pubnub.publish().channel("aruba_to_cloud.tp1.healthmon/stats").message("test publish").sync()
 
 
 def my_publish_callback(envelope, status):
@@ -61,7 +62,6 @@ def on_message(client, userdata, msg):
     print("message topic:" + str(msg.topic)+" "+str(msg.payload))
     m_decode=str(msg.payload.decode("utf-8","ignore"))
     payload_dict = json.loads(m_decode)
-    #converted_topic = msg.topic.replace("/",".") 
     forward_chanel = "edge_to_cloud." + str(deviceserialno) + "." + str(converted_topic)
     print("forward to pubnub channel: {}".format(forward_chanel))
     print("pubnub client:{}".format(dir(pubnub)))
@@ -73,8 +73,6 @@ def on_message(client, userdata, msg):
 def main():
     """run the application"""
     global client
-    global deviceserialno
-    deviceserialno = getserial()
     client.on_connect = on_connect
     client.on_message = on_message
     client.connect("localhost", 1883, 60)
