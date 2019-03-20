@@ -17,4 +17,4 @@ parts:
     plugin: dump
     source: .
 
-architectures: [armhf]
+architectures: [armhf amd64]
