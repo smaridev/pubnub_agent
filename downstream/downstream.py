@@ -9,11 +9,6 @@ from pubnub.enums import PNReconnectionPolicy, PNStatusCategory
 from pubnub.pnconfiguration import PNConfiguration
 from pubnub.pubnub import PubNub
 
-
-
-
-
-
 def getserial():
     cpuserial = "0000000000000000"
     try:
@@ -25,7 +20,7 @@ def getserial():
     except:
         cpuserial = "ERROR000000000"
    
-    return cpuserial 
+    return cpuserial    
 
 client = mqtt.Client()
 deviceserialno = getserial()
@@ -85,8 +80,9 @@ class MySubscribeCallback(SubscribeCallback):
         global deviceserialno
         print("message topic: {}".format(message.channel))
         app_topic = message.channel.replace("cloud_to_edge." + deviceserialno + ".", '')
+        app_topic = app_topic.replace("-","/")
         print("app_topic:{}".format(app_topic))
-        #client.publish(app_topic, message.payload)
+        client.publish(app_topic, json.dumps(message.message))
 
 def exit_handler():
     print("unsubscribing before exiting!")
@@ -98,12 +94,12 @@ def main():
     """run the application"""
     global client
     global deviceserialno
-    #client.connect("localhost", 1883, 60)
-    #client.loop_start()
+    client.connect("localhost", 1883, 60)
+    client.loop_start()
     pubnub.add_listener(MySubscribeCallback())
     downstream_channel = "cloud_to_edge." + deviceserialno + ".*"
     print("subscribing to downstream channel :{}".format(downstream_channel))
-    pubnub.subscribe().channels(downstream_channel).execute()
-    
+    pubnub.subscribe().channels(downstream_channel).execute()          
+ 
 if __name__ == '__main__':
     main()

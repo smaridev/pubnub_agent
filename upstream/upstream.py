@@ -20,8 +20,7 @@ def getserial():
     except:
         cpuserial = "ERROR000000000"
    
-    return cpuserial 
-
+    return cpuserial   
 
 pnconfig = PNConfiguration()
 deviceserialno = getserial()
