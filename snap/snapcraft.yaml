@@ -9,6 +9,7 @@ grade: stable
 apps:
   pubnub-agent:
     command: 'sh $SNAP/start.sh' 
+    plugs: [network, network-control]
 
 parts:
   pubnub-agent:
